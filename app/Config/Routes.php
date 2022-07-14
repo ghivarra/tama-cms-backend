@@ -37,6 +37,24 @@ $routes->set404Override();
 // route since we don't have to scan directories.
 $routes->get('/', 'Home::index');
 
+// add autentikasi
+$routes->group('autentikasi', function($routes){
+
+    $routes->add('/', 'AutentikasiController::try');
+    $routes->add('cek-akses', 'AutentikasiController::check');
+
+});
+
+// admin
+$routes->group('sertifikasi', function($routes){
+
+    $routes->group('admin', function($routes){
+
+        $routes->add('current-info', 'Newsroom\\SuperadminController::getCurrentAdmin');
+    });
+
+});
+
 /*
  * --------------------------------------------------------------------
  * Additional Routing

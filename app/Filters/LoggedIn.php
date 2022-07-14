@@ -4,7 +4,7 @@ use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
-use App\Models\Superadmin;
+use App\Models\Admin;
 
 class LoggedIn implements FilterInterface
 {
@@ -28,7 +28,7 @@ class LoggedIn implements FilterInterface
         $session  = Services::session();
         $response = Services::response();
 
-        $auth = new Superadmin();
+        $auth = new Admin();
 
         if ($auth->check())
         {
