@@ -71,13 +71,12 @@ class AutentikasiController extends BaseController
 
 	public function check()
 	{
-		$session = Services::session();
-		$admin   = new Admin();
+		$admin = new Admin();
 
 		if ($admin->check())
 		{
-			return $this->response->setStatusCode(200)->setJSON([
-				'code' 	   => 200,
+			return $this->response->setStatusCode(406)->setJSON([
+				'code' 	   => 406,
 				'status'   => 'OK',
 				'loggedIn' => TRUE
 			]);
@@ -87,6 +86,75 @@ class AutentikasiController extends BaseController
 			'code' 	   => 200,
 			'status'   => 'OK',
 			'loggedIn' => FALSE
+		]);
+	}
+
+	//===========================================================================================
+
+	public function forgotPassword()
+	{
+		helper('text');
+
+		$emailAkun = $this->request->getPost('email');
+		$admin 	   = new Admin();
+
+		// check
+		$get = $admin->select('adm_nama, adm_id')
+					 ->where('adm_status', 'aktif')
+					 ->where('adm_email', $emailAkun)
+					 ->first();
+
+		if (empty($get))
+		{
+			return $this->response->setStatusCode(401)->setJSON([
+				'code'    => 401,
+				'status'  => 'error',
+				'title'	  => 'Akun Tidak Ditemukan',
+				'message' => 'Periksa kembali penulisan email dan pastikan email yang diinput benar-benar terdaftar'
+			]);
+		}
+
+		// load library
+		$session = Services::session();
+		$email   = Services::email();
+
+		// update
+		$token  = random_string('numeric', 10);
+		$update = [
+			'adm_token_lupa'  => password_hash($token, PASSWORD_DEFAULT),
+			'adm_token_waktu' => date('Y-m-d H:i:s', strtotime('+6 minutes'))
+		];
+
+		// update
+		$admin->update($get['adm_id'], $update);
+
+		// simpan id akun ke session
+		$_SESSION['forgotpass'] = $get['adm_id'];
+		$session->markAsTempdata('forgotpass', 360);
+
+		// data
+		$data = [
+			'nama'  => $get['adm_nama'],
+			'view'  => 'email/v_email_forget',
+			'token' => $token
+		];
+
+		// escaping data
+		$data = esc($data);
+		$view = view('email/v_email_template', $data);
+
+		// kirim email
+		$email->setTo($emailAkun);
+		$email->setSubject('Kode OTP Perubahan Password');
+		$email->setMessage($view);
+		$email->send();
+
+		// return ok
+		return $this->response->setStatusCode(200)->setJSON([
+			'code'    => 200,
+			'status'  => 'success',
+			'title'	  => 'Kode OTP Berhasil Dikirim',
+			'message' => 'Periksa email anda, kode OTP hanya berlaku selama 5 menit'
 		]);
 	}
 

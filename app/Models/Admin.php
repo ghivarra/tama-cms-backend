@@ -37,18 +37,13 @@ class Admin extends Model
     protected $deletedField  = 'adm_deleted_at';
 
 
-    protected $createdByField = 'adm_created_by';
-    protected $updatedByField = 'adm_updated_by';
     protected $validationRules    = [];
     protected $validationMessages = [];
     protected $skipValidation     = TRUE;
 
     protected $allowCallbacks = TRUE;
 
-    protected $afterFind    = ['timestamp'];
-    protected $beforeInsert = ['beforeAdd'];
-    protected $beforeUpdate = ['beforeSave'];
-    protected $beforeDelete = ['whoDeleteThis'];
+    protected $afterFind = ['timestamp'];
 
     //========================================================================================================
 

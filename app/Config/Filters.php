@@ -78,7 +78,7 @@ class Filters extends BaseConfig
      */
     public $filters = [
         'loggedIn' => [
-            'before' => ['autentikasi']
+            'before' => ['autentikasi', 'autentikasi/*']
         ],
         'loggedOut' => [
             'before' => ['newsroom', 'newsroom/*']
