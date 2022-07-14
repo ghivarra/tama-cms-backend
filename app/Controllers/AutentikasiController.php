@@ -119,24 +119,20 @@ class AutentikasiController extends BaseController
 		$email   = Services::email();
 
 		// update
-		$token  = random_string('numeric', 10);
+		$token  = random_string('alnum', 120);
 		$update = [
-			'adm_token_lupa'  => password_hash($token, PASSWORD_DEFAULT),
+			'adm_token_lupa'  => $token,
 			'adm_token_waktu' => date('Y-m-d H:i:s', strtotime('+6 minutes'))
 		];
 
 		// update
 		$admin->update($get['adm_id'], $update);
 
-		// simpan id akun ke session
-		$_SESSION['forgotpass'] = $get['adm_id'];
-		$session->markAsTempdata('forgotpass', 360);
-
 		// data
 		$data = [
 			'nama'  => $get['adm_nama'],
 			'view'  => 'email/v_email_forget',
-			'token' => $token
+			'token' => $_ENV['APP_BASE_URL'] . "{$_ENV['APP_LOGIN_PAGE']}/ubah-password?token={$token}"
 		];
 
 		// escaping data
@@ -145,7 +141,7 @@ class AutentikasiController extends BaseController
 
 		// kirim email
 		$email->setTo($emailAkun);
-		$email->setSubject('Kode OTP Perubahan Password');
+		$email->setSubject('Link/URL Perubahan Password');
 		$email->setMessage($view);
 		$email->send();
 
@@ -153,8 +149,145 @@ class AutentikasiController extends BaseController
 		return $this->response->setStatusCode(200)->setJSON([
 			'code'    => 200,
 			'status'  => 'success',
-			'title'	  => 'Kode OTP Berhasil Dikirim',
-			'message' => 'Periksa email anda, kode OTP hanya berlaku selama 5 menit'
+			'title'	  => 'URL Berhasil Dikirim',
+			'message' => 'Periksa email anda, Link/URL perubahan password hanya berlaku selama 5 menit'
+		]);
+	}
+
+	//===========================================================================================
+
+	public function changePasswordData()
+	{
+		$token = $this->request->getPost('token');
+
+		if (!isset($token) OR empty($token))
+		{
+			return $this->response->setStatusCode(403)->setJSON([
+				'code'    => 403,
+				'status'  => 'error',
+				'title'	  => 'Token Tidak Valid',
+				'message' => 'Pastikan anda mengakses link/url perubahan yang valid'
+			]);
+		}
+
+		// set parameter
+		$params = [
+			'adm_token_lupa' 	=> $token,
+			'adm_status'		=> 'aktif',
+			'adm_token_waktu>=' => date('Y-m-d H:i:s'),
+		];
+
+		// get data
+		$admin = new Admin();
+		$get   = $admin->select('adm_nama, adm_email')
+					   ->where($params)
+					   ->first();
+
+		if (empty($get))
+		{
+			return $this->response->setStatusCode(403)->setJSON([
+				'code'    => 403,
+				'status'  => 'error',
+				'title'	  => 'Sesi Perubahan Password Sudah Berakhir',
+				'message' => 'Lakukan konfirmasi email akun anda terlebih dahulu'
+			]);
+		}
+
+		// return
+		return $this->response->setStatusCode(200)->setJSON([
+			'code'    => 200,
+			'status'  => 'success',
+			'title'	  => 'Data Admin Berhasil Ditarik',
+			'message' => 'Silahkan isi kolom password dan konfirmasi password',
+			'data'	  => $get
+		]);
+	}
+	
+	//===========================================================================================
+
+	public function changePasswordPost()
+	{
+		$data = [
+			'token' 	 => $this->request->getPost('token'),
+			'password'	 => $this->request->getPost('password'),
+			'konfirmasi' => $this->request->getPost('konfirmasi')
+		];
+
+		// validasi
+		$validation = Services::validation();
+		$validation->setRules([
+			'token' 	 => ['label' => 'Token', 'rules' => 'required'],
+			'password'	 => ['label' => 'Password', 'rules' => 'required|matches[konfirmasi]|min_length[10]'],
+			'konfirmasi' => ['label' => 'Konfirmasi Password', 'rules' => 'required'],
+		]);
+
+		// set
+		if (!$validation->run($data))
+		{
+			$errors = $validation->getErrors();
+
+			if (!preg_match("#[0-9]+#", $data['password']))
+			{
+				$errors['password'] = 'Password harus menggunakan huruf dan angka';
+			}
+
+			return $this->response->setStatusCode(400)->setJSON([
+				'code'    => 400,
+				'status'  => 'error',
+				'title'	  => 'Gagal Merubah Password',
+				'message' => implode(', ', $errors)
+			]);
+
+		} elseif (!preg_match("#[0-9]+#", $data['password'])) {
+
+			return $this->response->setStatusCode(400)->setJSON([
+				'code'    => 400,
+				'status'  => 'error',
+				'title'	  => 'Gagal Merubah Password',
+				'message' => 'Password harus menggunakan huruf dan angka'
+			]);
+		}
+
+		// get akun
+		// set parameter
+		$params = [
+			'adm_token_lupa' 	=> $data['token'],
+			'adm_status'		=> 'aktif',
+			'adm_token_waktu>=' => date('Y-m-d H:i:s'),
+		];
+
+		// get data
+		$admin = new Admin();
+		$get   = $admin->select('adm_id')
+					   ->where($params)
+					   ->first();
+
+		if (empty($get))
+		{
+			return $this->response->setStatusCode(403)->setJSON([
+				'code'    => 403,
+				'status'  => 'error',
+				'title'	  => 'Sesi Perubahan Password Sudah Berakhir',
+				'message' => 'Lakukan konfirmasi email akun anda terlebih dahulu'
+			]);
+		}
+
+		// parse data
+		$update = [
+			'adm_password'    => password_hash($data['password'], PASSWORD_DEFAULT),
+			'adm_token_lupa'  => NULL,
+			'adm_token_waktu' => NULL
+		];
+
+		// update
+		$admin->update($get['adm_id'], $update);
+
+		// return
+		return $this->response->setStatusCode(200)->setJSON([
+			'code'    => 200,
+			'status'  => 'success',
+			'title'	  => 'Perubahan Berhasil Disimpan',
+			'message' => 'Password akun anda berhasil dirubah, silahkan coba masuk kembali'
 		]);
 	}
 

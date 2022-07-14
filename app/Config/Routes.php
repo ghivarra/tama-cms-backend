@@ -42,8 +42,15 @@ $routes->group('autentikasi', function($routes){
 
     $routes->add('/', 'AutentikasiController::try');
     $routes->add('cek-akses', 'AutentikasiController::check');
-    $routes->add('lupa-password', 'AutentikasiController::forgotPassword');
 
+    $routes->group('lupa-password', function($routes){
+        $routes->add('post', 'AutentikasiController::forgotPassword');
+    });
+
+    $routes->group('ubah-password', function($routes){
+        $routes->add('data', 'AutentikasiController::changePasswordData');
+        $routes->add('post', 'AutentikasiController::changePasswordPost');
+    });
 });
 
 // admin
