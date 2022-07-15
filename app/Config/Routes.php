@@ -36,7 +36,7 @@ $routes->set404Override();
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
 $routes->get('/', 'Home::index');
-$routes->get('website', 'WebsiteController::get');
+$routes->add('website', 'WebsiteController::get');
 
 // add autentikasi
 $routes->group('autentikasi', function($routes){
@@ -56,12 +56,8 @@ $routes->group('autentikasi', function($routes){
 
 // admin
 $routes->group('sertifikasi', function($routes){
-
-    $routes->group('admin', function($routes){
-
-        $routes->add('current-info', 'Newsroom\\SuperadminController::getCurrentAdmin');
-    });
-
+    $routes->add('logout', 'LIT\\SessionController::logout');
+    $routes->add('admin-info', 'LIT\\SessionController::getAdminInfo');
 });
 
 /*

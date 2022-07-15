@@ -81,7 +81,7 @@ class Filters extends BaseConfig
             'before' => ['autentikasi', 'autentikasi/*']
         ],
         'loggedOut' => [
-            'before' => ['newsroom', 'newsroom/*']
+            'before' => ['sertifikasi', 'sertifikasi/*']
         ],
         'throttle' => [
             'before' => ['autentikasi', 'autentikasi/*']
