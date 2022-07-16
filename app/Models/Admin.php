@@ -43,130 +43,12 @@ class Admin extends Model
 
     protected $allowCallbacks = TRUE;
 
-    protected $afterFind = ['timestamp'];
-
     //========================================================================================================
 
     public function __construct()
     {
         parent::__construct();
         $this->app = new App();
-    }
-
-    //========================================================================================================
-
-    protected function timestamp(array $res)
-    {
-        if (!isset($res['data']) OR empty($res['data']))
-        {
-            return $res;
-        }
-
-        // change
-        $timestamp = [$this->createdField, $this->updatedField, $this->deletedField];
-
-        // check
-        if (isset($res['data'][0]))
-        {
-            foreach ($res['data'] as $n => $item):
-
-                foreach ($timestamp as $value)
-                {
-                    if (isset($item[$value]))
-                    {
-                        $res['data'][$n][$value] = strtotime($item[$value]);
-                    }
-                }
-
-            endforeach;
-
-        } else {
-
-            foreach ($timestamp as $value):
-
-                if (isset($res['data'][$value]))
-                {
-                    $res['data'][$value] = strtotime($res['data'][$value]);
-                }
-
-            endforeach;
-        }
-
-        // return
-        return $res;
-    }
-
-    //========================================================================================================
-
-    protected function whoDeleteThis(array $param)
-    {
-        $id = $param['id'];
-        $this->update($id, [$this->updatedByField => $_SESSION['admin']['adm_id']]);
-
-        return $param;
-    }
-
-    //========================================================================================================
-
-    protected function beforeAdd($res)
-    {
-        return $this->getResponsibleAdmin('insert', $res);
-    }
-
-    //========================================================================================================
-
-    protected function beforeSave($res)
-    {
-        return $this->getResponsibleAdmin('update', $res);
-    }
-
-    //========================================================================================================
-
-    protected function getResponsibleAdmin($type, $res)
-    {
-        if (!isset($_SESSION['admin']['adm_id']))
-        {
-            return $res;
-        }
-
-        // check if one or more
-        if (!isset($res['data']) OR empty($res['data']))
-        {
-            return $res;
-        }
-
-        // if multiple data or one row
-        if ($type == 'insert')
-        {
-            if (isset($res['data'][0]))
-            {
-                foreach ($res['data'] as $n => $item):
-
-                    $res['data'][$n][$this->createdByField] = $_SESSION['admin']['adm_id'];
-
-                endforeach;
-
-            } else {
-
-                $res['data'][$this->createdByField] = $_SESSION['admin']['adm_id'];
-            }
-        }
-
-        if (isset($res['data'][0]))
-        {
-            foreach ($res['data'] as $n => $item):
-
-                $res['data'][$n][$this->updatedByField] = $_SESSION['admin']['adm_id'];
-
-            endforeach;
-
-        } else {
-
-            $res['data'][$this->updatedByField] = $_SESSION['admin']['adm_id'];
-        }
-
-        // return
-        return $res;
     }
 
     //========================================================================================================
@@ -200,7 +82,9 @@ class Admin extends Model
 
     public function auth(string $email, string $password, array $params = [])
     {
-        $get = $this->where(['adm_email' => $email]);
+        $get = $this->select('admin.*, rol_nama, rol_list_modul, rol_list_menu')
+                    ->join('admin_role', 'adm_role = rol_id', 'left')
+                    ->where(['adm_email' => $email]);
 
         if (!empty($params))
         {
@@ -211,6 +95,10 @@ class Admin extends Model
         {
             return FALSE;
         }
+
+        // set to non json
+        $get['rol_list_menu'] = json_decode($get['rol_list_menu'], TRUE);
+        $get['rol_list_modul'] = json_decode($get['rol_list_modul'], TRUE);
 
         // unset data
         unset($get['adm_password']);
@@ -246,6 +134,30 @@ class Admin extends Model
             return FALSE;
         }
 
+        // check akun
+        $get = $this->select('admin.*, rol_nama, rol_list_modul, rol_list_menu')
+                    ->join('admin_role', 'adm_role = rol_id', 'left')
+                    ->where('adm_id', $_SESSION['admin']['adm_id'])
+                    ->where('adm_status', 'aktif')
+                    ->first();
+
+        if (empty($get))
+        {
+            return FALSE;
+        }
+
+        // set to non json
+        $get['rol_list_menu'] = json_decode($get['rol_list_menu'], TRUE);
+        $get['rol_list_modul'] = json_decode($get['rol_list_modul'], TRUE);
+
+        // set new session
+        unset($get['adm_password']);
+        unset($get['adm_token_lupa']);
+        unset($get['adm_token_waktu']);
+
+        $_SESSION['admin'] = $get;
+
+        // return
         return TRUE;
     }
 

@@ -1,7 +1,7 @@
 <?php namespace App\Models;
 
 /**
- * Pengaturan ORM
+ * Admin Menu ORM
  *
  * "I treat my works as my own child, be careful with my childrens"
  *
@@ -19,25 +19,25 @@
 use CodeIgniter\Model;
 use Config\App;
 
-class Pengaturan extends Model
+class AdminMenu extends Model
 {
-    protected $table      = 'pengaturan';
-    protected $primaryKey = 'pgn_id';
+    protected $table      = 'admin_menu';
+    protected $primaryKey = 'men_id';
 
     protected $useAutoIncrement = TRUE;
 
     protected $returnType     = 'array';
     protected $useSoftDeletes = TRUE;
 
-    protected $allowedFields = ['pgn_nama', 'pgn_slug', 'pgn_tagline', 'pgn_deskripsi', 'pgn_versi_logo', 'pgn_versi_icon', 'pgn_versi_web', 'pgn_updated_by', 'pgn_created_by'];
+    protected $allowedFields = ['men_nama', 'men_jenis', 'men_parent', 'men_link', 'men_icon', 'men_urutan', 'men_status', 'men_updated_by', 'men_created_by'];
 
     protected $useTimestamps = TRUE;
-    protected $createdField  = 'pgn_created_at';
-    protected $updatedField  = 'pgn_updated_at';
-    protected $deletedField  = 'pgn_deleted_at';
+    protected $createdField  = 'men_created_at';
+    protected $updatedField  = 'men_updated_at';
+    protected $deletedField  = 'men_deleted_at';
 
-    protected $createdByField = 'pgn_created_by';
-    protected $updatedByField = 'pgn_updated_by';
+    protected $createdByField = 'men_created_by';
+    protected $updatedByField = 'men_updated_by';
 
     protected $validationRules    = [];
     protected $validationMessages = [];
@@ -128,6 +128,33 @@ class Pengaturan extends Model
 
         // return
         return $res;
+    }
+
+    //========================================================================================================
+
+    public function datatable(array $data, int $offset = 0)
+    {
+        if (empty($data))
+        {
+            return $data;
+        }
+
+        foreach ($data as $n => $item):
+
+            if(isset($offset))
+            {
+                $data[$n]['no'] = $offset + $n + 1;
+            }
+
+            if (isset($item['adm_status']))
+            {
+                $data[$n]['adm_status'] = ucfirst($item['adm_status']);
+            }
+
+        endforeach;
+
+        // return
+        return $data;
     }
 
     //========================================================================================================
