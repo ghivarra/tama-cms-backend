@@ -35,4 +35,20 @@ class SessionController extends BaseController
     }
 
     //======================================================================================================
+
+    public function getAdminInfo()
+    {
+        $admin = new Admin();
+
+        // return
+        return $this->response->setStatusCode(200)->setJSON([
+            'code'    => 200,
+            'status'  => 'success',
+            'title'   => 'Berhasil Menarik Data',
+            'message' => 'Anda berhasil menarik data akun anda',
+            'data'    => $admin->info()
+        ]);
+    }
+    
+    //======================================================================================================
 }
