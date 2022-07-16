@@ -39,25 +39,33 @@ $routes->get('/', 'Home::index');
 $routes->add('website', 'WebsiteController::get');
 
 // add autentikasi
-$routes->group('autentikasi', function($routes){
+$routes->group('autentikasi', function($routes) {
 
     $routes->add('/', 'AutentikasiController::try');
     $routes->add('cek-akses', 'AutentikasiController::check');
 
-    $routes->group('lupa-password', function($routes){
+    $routes->group('lupa-password', function($routes) {
         $routes->add('post', 'AutentikasiController::forgotPassword');
     });
 
-    $routes->group('ubah-password', function($routes){
+    $routes->group('ubah-password', function($routes) {
         $routes->add('data', 'AutentikasiController::changePasswordData');
         $routes->add('post', 'AutentikasiController::changePasswordPost');
     });
 });
 
 // admin
-$routes->group('sertifikasi', function($routes){
+$routes->group('sertifikasi', function($routes) {
     $routes->add('logout', 'LIT\\SessionController::logout');
     $routes->add('admin-info', 'LIT\\SessionController::getAdminInfo');
+
+    $routes->group('modul', function($routes) {
+        $routes->add('select/(:num)', 'LIT\\ModulController::select/$1');
+        $routes->add('get', 'LIT\\ModulController::get');
+        $routes->add('create', 'LIT\\ModulController::create');
+        $routes->add('update', 'LIT\\ModulController::update');
+        $routes->add('delete', 'LIT\\ModulController::delete');
+    });
 });
 
 /*
