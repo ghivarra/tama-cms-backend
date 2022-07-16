@@ -32,6 +32,10 @@ class LoggedOut implements FilterInterface
 
         if (!$auth->check())
         {
+            // destroy sesi
+            session_destroy();
+
+            // send
             return $response->setStatusCode(401)->setJSON([
                 'code'    => 401,
                 'status'  => 'error',
