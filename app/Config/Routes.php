@@ -60,11 +60,15 @@ $routes->group('sertifikasi', function($routes) {
     $routes->add('admin-info', 'LIT\\SessionController::getAdminInfo');
 
     $routes->group('modul', function($routes) {
-        $routes->add('select/(:num)', 'LIT\\ModulController::select/$1');
+        $routes->add('select/(:num)', 'LIT\\ModulController::select/$1', ['as' => 'Modul']);
         $routes->add('get', 'LIT\\ModulController::get');
         $routes->add('create', 'LIT\\ModulController::create');
         $routes->add('update', 'LIT\\ModulController::update');
         $routes->add('delete', 'LIT\\ModulController::delete');
+    });
+
+    $routes->group('akun', function($routes) {
+        $routes->add('update', 'LIT\\AkunController::update');
     });
 });
 

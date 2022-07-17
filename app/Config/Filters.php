@@ -11,6 +11,7 @@ use CodeIgniter\Filters\SecureHeaders;
 use App\Filters\LoggedIn;
 use App\Filters\LoggedOut;
 use App\Filters\Api;
+use App\Filters\AksesFilter;
 use App\Filters\Throttle;
 
 class Filters extends BaseConfig
@@ -30,7 +31,8 @@ class Filters extends BaseConfig
         'loggedIn'      => LoggedIn::class,
         'loggedOut'     => LoggedOut::class,
         'throttle'      => Throttle::class,
-        'api'           => Api::class
+        'api'           => Api::class,
+        'akses'         => AksesFilter::class
     ];
 
     /**
@@ -82,6 +84,9 @@ class Filters extends BaseConfig
         ],
         'loggedOut' => [
             'before' => ['sertifikasi', 'sertifikasi/*']
+        ],
+        'akses' => [
+            'before' => ['sertifikasi/modul/*']
         ],
         'throttle' => [
             'before' => ['autentikasi', 'autentikasi/*']
