@@ -29,7 +29,7 @@ class Admin extends Model
     protected $returnType     = 'array';
     protected $useSoftDeletes = TRUE;
 
-    protected $allowedFields = ['adm_nama', 'adm_password', 'adm_email', 'adm_status', 'adm_role', 'adm_foto', 'adm_token_lupa', 'adm_token_waktu', 'adm_updated_by', 'adm_created_by'];
+    protected $allowedFields = ['adm_nama', 'adm_password', 'adm_email', 'adm_status', 'adm_role', 'adm_foto', 'adm_token_lupa', 'adm_token_waktu', 'adm_otp', 'adm_updated_by', 'adm_created_by'];
 
     protected $useTimestamps = TRUE;
     protected $createdField  = 'adm_created_at';

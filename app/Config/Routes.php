@@ -69,6 +69,8 @@ $routes->group('sertifikasi', function($routes) {
 
     $routes->group('akun', function($routes) {
         $routes->add('update', 'LIT\\AkunController::update');
+        $routes->add('rubah-password', 'LIT\\AkunController::changePassword');
+        $routes->add('konfirmasi-otp', 'LIT\\AkunController::confirmation');
     });
 });
 

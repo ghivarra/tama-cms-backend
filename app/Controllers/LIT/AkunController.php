@@ -77,21 +77,118 @@ class AkunController extends BaseController
 
     //====================================================================================================
 
-    public function get()
+    public function changePassword()
     {
+        $data = [
+            'password_lama' => $this->request->getPost('password_lama'),
+            'password_baru' => $this->request->getPost('password_baru'),
+            'password_konf' => $this->request->getPost('password_konf'),
+        ];
 
+        // data admin
+        $admin = new Admin();
+        $get   = $admin->select('adm_password')
+                       ->where('adm_id', $_SESSION['admin']['adm_id'])
+                       ->where('adm_status', 'aktif')
+                       ->first();
+
+        // verifikasi password
+        if (empty($get) OR !password_verify($data['password_lama'], $get['adm_password']))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Menyimpan Password',
+                'message' => 'Password lama tidak sesuai'
+            ]);
+        }
+
+        // validasi
+        $validation = Services::validation();
+        $validation->setRules([
+            'password_lama' => ['label' => 'Password Lama', 'rules' => 'required'],
+            'password_baru' => ['label' => 'Password Baru', 'rules' => 'required|matches[password_konf]|min_length[10]'],
+            'password_konf' => ['label' => 'Password Konfirmasi', 'rules' => 'required'],
+        ]);
+
+        if (!$validation->run($data))
+        {
+            $errors = $validation->getErrors();
+
+            if (!preg_match("#[0-9]+#", $data['password_baru']))
+            {
+                $errors['password_baru'] = 'Password harus menggunakan huruf dan angka';
+            }
+
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Menyimpan Password',
+                'message' => implode(', ', $errors)
+            ]);
+
+        } elseif (!preg_match("#[0-9]+#", $data['password_baru'])) {
+
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Menyimpan Password',
+                'message' => 'Password harus menggunakan huruf dan angka'
+            ]);
+        }
+
+        // simpan dan enkripsi password di sesi
+        $encrypter = Services::encrypter();
+        $session   = Services::session();
+        $email     = Services::email();
+
+        // enkripsi password
+        $password = $encrypter->encrypt($data['password_baru']);
+        $_SESSION['new_password'] = bin2hex($password);
+        $session->markAsTempdata('new_password', 420);
+
+        // load helper text
+        helper('text');
+
+        // buat token
+        $otp = random_string('numeric', 6);
+        $set = [
+            'adm_otp'       => password_hash($otp, PASSWORD_DEFAULT),
+            'adm_otp_waktu' => date('Y-m-d H:i:s', strtotime('+7 minutes'))
+        ];
+
+        // update
+        $admin->update($_SESSION['admin']['adm_id'], $set);
+
+        // data kirim via email
+        $send = [
+            'nama'  => $_SESSION['admin']['adm_nama'],
+            'view'  => 'email/v_email_change',
+            'token' => $otp
+        ];
+
+        // escaping data
+        $data = esc($send);
+        $view = view('email/v_email_template', $send);
+
+        // kirim email
+        $email->setTo($_SESSION['admin']['adm_email']);
+        $email->setSubject('Kode OTP Perubahan Password');
+        $email->setMessage($view);
+        $email->send();
+
+        // return ok
+        return $this->response->setStatusCode(200)->setJSON([
+            'code'    => 200,
+            'status'  => 'success',
+            'title'   => 'Kode OTP Sudah Dikirim',
+            'message' => 'Periksa email anda, Kode OTP hanya berlaku selama 5 menit'
+        ]);
     }
 
     //====================================================================================================
 
     public function create()
-    {
-
-    }
-
-    //====================================================================================================
-
-    public function delete()
     {
 
     }
