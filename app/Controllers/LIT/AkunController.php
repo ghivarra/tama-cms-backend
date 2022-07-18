@@ -188,9 +188,86 @@ class AkunController extends BaseController
 
     //====================================================================================================
 
-    public function create()
+    public function confirmation()
     {
+        $data['otp'] = $this->request->getPost('otp');
 
+        // validasi
+        $validation = Services::validation();
+        $validation->setRules([
+            'otp' => ['label' => 'Kode OTP', 'rules' => 'required|exact_length[6]|numeric']
+        ]);
+
+        if (!$validation->run($data))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Kode Tidak valid',
+                'message' => implode(', ', $validation->getErrors())
+            ]);
+        }
+
+        // get
+        $params = [
+            'adm_id'     => $_SESSION['admin']['adm_id'],
+            'adm_status' => 'aktif',
+            'adm_otp !=' => NULL,
+            'adm_otp_waktu >=' => date('Y-m-d H:i:s'),
+        ];
+
+        // admin
+        $admin = new Admin();
+        $get   = $admin->select('adm_otp')
+                       ->where($params)
+                       ->first();
+
+        if (empty($get))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Kode Tidak valid',
+                'message' => 'Kode OTP Kadaluwarsa atau akun sudah dinonaktifkan'
+            ]);
+        }
+
+        // verifikasi
+        if (!password_verify($data['otp'], $get['adm_otp']))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Kode Tidak valid',
+                'message' => 'Kode OTP yang diinput tidak sesuai'
+            ]);
+        }
+
+        // parse password
+        $encrypter = Services::encrypter();
+        $password  = hex2bin($_SESSION['new_password']);
+        $password  = $encrypter->decrypt($password);
+
+        // update
+        $set = [
+            'adm_otp'       => NULL,
+            'adm_otp_waktu' => NULL,
+            'adm_password'  => password_hash($password, PASSWORD_DEFAULT)
+        ];
+
+        // update
+        $admin->update($_SESSION['admin']['adm_id'], $set);
+
+        // unset session
+        unset($_SESSION['new_password']);
+
+        // return ok
+        return $this->response->setStatusCode(200)->setJSON([
+            'code'    => 200,
+            'status'  => 'success',
+            'title'   => 'Penyimpanan Berhasil',
+            'message' => 'Password akun anda berhasil dirubah'
+        ]);
     }
 
     //====================================================================================================

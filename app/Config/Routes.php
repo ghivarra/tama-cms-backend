@@ -58,6 +58,7 @@ $routes->group('autentikasi', function($routes) {
 $routes->group('sertifikasi', function($routes) {
     $routes->add('logout', 'LIT\\SessionController::logout');
     $routes->add('admin-info', 'LIT\\SessionController::getAdminInfo');
+    $routes->add('menu-list', 'LIT\\SessionController::getAllowedMenu');
 
     $routes->group('modul', function($routes) {
         $routes->add('select/(:num)', 'LIT\\ModulController::select/$1', ['as' => 'Modul']);
