@@ -36,42 +36,46 @@ $routes->set404Override();
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
 $routes->get('/', 'Home::index');
-$routes->add('website', 'WebsiteController::get');
+$routes->match(['get', 'options'], 'website', 'WebsiteController::get');
 
 // add autentikasi
 $routes->group('autentikasi', function($routes) {
 
-    $routes->add('/', 'AutentikasiController::try');
-    $routes->add('cek-akses', 'AutentikasiController::check');
+    $routes->match(['post', 'options'], '/', 'AutentikasiController::try');
+    $routes->match(['get', 'options'], 'cek-akses', 'AutentikasiController::check');
 
     $routes->group('lupa-password', function($routes) {
-        $routes->add('post', 'AutentikasiController::forgotPassword');
+        $routes->match(['post', 'options'], 'post', 'AutentikasiController::forgotPassword');
     });
 
     $routes->group('ubah-password', function($routes) {
-        $routes->add('data', 'AutentikasiController::changePasswordData');
-        $routes->add('post', 'AutentikasiController::changePasswordPost');
+        $routes->match(['post', 'options'], 'data', 'AutentikasiController::changePasswordData');
+        $routes->match(['post', 'options'], 'post', 'AutentikasiController::changePasswordPost');
     });
 });
 
 // admin
 $routes->group('sertifikasi', function($routes) {
-    $routes->add('logout', 'LIT\\SessionController::logout');
-    $routes->add('admin-info', 'LIT\\SessionController::getAdminInfo');
-    $routes->add('menu-list', 'LIT\\SessionController::getAllowedMenu');
-
-    $routes->group('modul', function($routes) {
-        $routes->add('select/(:num)', 'LIT\\ModulController::select/$1', ['as' => 'Modul']);
-        $routes->add('get', 'LIT\\ModulController::get');
-        $routes->add('create', 'LIT\\ModulController::create');
-        $routes->add('update', 'LIT\\ModulController::update');
-        $routes->add('delete', 'LIT\\ModulController::delete');
-    });
+    $routes->match(['get', 'options'], 'logout', 'LIT\\SessionController::logout');
+    $routes->match(['get', 'options'], 'admin-info', 'LIT\\SessionController::getAdminInfo');
+    $routes->match(['get', 'options'], 'menu-list', 'LIT\\SessionController::getAllowedMenu');
 
     $routes->group('akun', function($routes) {
-        $routes->add('update', 'LIT\\AkunController::update');
-        $routes->add('rubah-password', 'LIT\\AkunController::changePassword');
-        $routes->add('konfirmasi-otp', 'LIT\\AkunController::confirmation');
+        $routes->match(['post', 'options'], 'update', 'LIT\\AkunController::update');
+        $routes->match(['post', 'options'], 'rubah-password', 'LIT\\AkunController::changePassword');
+        $routes->match(['post', 'options'], 'konfirmasi-otp', 'LIT\\AkunController::confirmation');
+    });
+
+    $routes->group('modul', function($routes) {
+        $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\ModulController::select/$1', ['as' => 'Modul']);
+        $routes->match(['get', 'options'], 'get', 'LIT\\ModulController::get');
+        $routes->match(['post', 'options'], 'create', 'LIT\\ModulController::create');
+        $routes->match(['post', 'options'], 'update', 'LIT\\ModulController::update');
+        $routes->match(['post', 'options'], 'delete', 'LIT\\ModulController::delete');
+    });
+
+    $routes->group('website', function($routes) {
+        $routes->match(['post', 'options'], 'update', 'LIT\\PengaturanController::update');
     });
 });
 

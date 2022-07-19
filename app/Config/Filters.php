@@ -86,7 +86,7 @@ class Filters extends BaseConfig
             'before' => ['sertifikasi', 'sertifikasi/*']
         ],
         'akses' => [
-            'before' => ['sertifikasi/modul/*']
+            'before' => ['sertifikasi/modul/*', 'sertifikasi/website/*']
         ],
         'throttle' => [
             'before' => ['autentikasi', 'autentikasi/*']
