@@ -166,14 +166,131 @@ class ModulController extends BaseController
 
     public function update()
     {
+        $data = [
+            'mod_id'     => $this->request->getPost('mod_id'),
+            'mod_nama'   => $this->request->getPost('mod_nama'),
+            'mod_status' => $this->request->getPost('mod_status')
+        ];
 
+        // validasi
+        $validation = Services::validation();
+        $validation->setRules([
+            'mod_id'     => ['label' => 'Modul', 'rules' => 'required|numeric|is_not_unique[admin_modul.mod_id]'],
+            'mod_nama'   => ['label' => 'Nama Modul', 'rules' => 'required|max_length[120]'],
+            'mod_status' => ['label' => 'Status', 'rules' => 'required|in_list[aktif,nonaktif]'],
+        ]);
+
+        // run
+        if (!$validation->run($data))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Menyimpan Data',
+                'message' => implode(', ', $validation->getErrors())
+            ]);
+        }
+
+        // now unset unused data
+        $id = $data['mod_id'];
+        unset($data['mod_id']);
+
+        $modul = new AdminModul();
+        $modul->update($id, $data);
+
+        // return
+        return $this->response->setStatusCode(200)->setJSON([
+            'code'    => 200,
+            'status'  => 'success',
+            'title'   => 'Data Disimpan',
+            'message' => "Perubahan Modul {$data['mod_nama']} sudah disimpan"
+        ]);
+    }
+
+    //====================================================================================================
+
+    public function updateStatus()
+    {
+        $id = $this->request->getPost('mod_id');
+
+        if (empty($id))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Merubah Status',
+                'message' => 'Modul Tidak Ditemukan'
+            ]);
+        }
+
+        $modul = new AdminModul();
+        $get   = $modul->select('mod_status, mod_nama')->where('mod_id', $id)->first();
+
+        if (empty($get))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Merubah Status',
+                'message' => 'Modul Tidak Ditemukan'
+            ]);
+        }
+
+        // update
+        $set['mod_status'] = ($get['mod_status'] == 'aktif') ? 'nonaktif' : 'aktif';
+        $modul->update($id, $set);
+
+        // set status
+        $status = ($set['mod_status'] == 'aktif') ? 'diaktifkan' : 'dinonaktifkan';
+
+        // return
+        return $this->response->setStatusCode(200)->setJSON([
+            'code'    => 200,
+            'status'  => 'success',
+            'title'   => 'Status Disimpan',
+            'message' => "Modul {$get['mod_nama']} sudah {$status}"
+        ]);
     }
 
     //====================================================================================================
 
     public function delete()
     {
+        $id = $this->request->getPost('mod_id');
 
+        if (empty($id))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Menghapus Data',
+                'message' => 'Modul Tidak Ditemukan'
+            ]);
+        }
+
+        $modul = new AdminModul();
+        $get   = $modul->select('mod_nama')->where('mod_id', $id)->first();
+
+        if (empty($get))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Menghapus Data',
+                'message' => 'Modul Tidak Ditemukan'
+            ]);
+        }
+
+        // delete
+        $modul->delete($id);
+
+        // return
+        return $this->response->setStatusCode(200)->setJSON([
+            'code'    => 200,
+            'status'  => 'success',
+            'title'   => 'Data Dihapus',
+            'message' => "Modul {$get['mod_nama']} sudah dihapus"
+        ]);
     }
 
     //====================================================================================================
