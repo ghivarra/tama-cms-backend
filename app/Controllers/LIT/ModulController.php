@@ -159,7 +159,40 @@ class ModulController extends BaseController
 
     public function create()
     {
+        $data = [
+            'mod_nama'   => $this->request->getPost('mod_nama'),
+            'mod_status' => $this->request->getPost('mod_status')
+        ];
 
+        // validasi
+        $validation = Services::validation();
+        $validation->setRules([
+            'mod_nama'   => ['label' => 'Nama Modul', 'rules' => 'required|max_length[120]|is_unique[admin_modul.mod_nama]'],
+            'mod_status' => ['label' => 'Status', 'rules' => 'required|in_list[aktif,nonaktif]'],
+        ]);
+
+        // run
+        if (!$validation->run($data))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Menyimpan Data',
+                'message' => implode(', ', $validation->getErrors())
+            ]);
+        }
+
+        // create data
+        $modul = new AdminModul();
+        $modul->insert($data);
+
+        // return
+        return $this->response->setStatusCode(200)->setJSON([
+            'code'    => 200,
+            'status'  => 'success',
+            'title'   => 'Data Disimpan',
+            'message' => "Modul {$data['mod_nama']} sudah dibuat"
+        ]);
     }
 
     //====================================================================================================
