@@ -54,9 +54,105 @@ class ModulController extends BaseController
 
     //====================================================================================================
 
-    public function get()
+    public function datatable()
     {
+        $modul = new AdminModul();
 
+        // get request
+        $order  = $this->request->getGet('order');
+        $start  = $this->request->getGet('start');
+        $length = $this->request->getGet('length');
+        $search = $this->request->getGet('search');
+        $column = $this->request->getGet('columns');
+        $select = "mod_id, mod_nama, mod_status, mod_created_at as date_create, mod_updated_at as date_update, admin_update.adm_nama as updater, admin_create.adm_nama as creator";
+
+
+        // order field
+        $orderKey   = $order[0]['column'];
+        $orderField = $column[$orderKey]['data'];
+        $orderType  = strtoupper($order[0]['dir']);
+
+        // get total data
+        $total = $modul->where('mod_deleted_at', NULL)->countAllResults();
+
+        // add search field
+        $searchField = [];
+
+        foreach ($column as $item):
+
+            if (!empty($item['search']['value']))
+            {
+                array_push($searchField, [
+                    'field' => $item['data'],
+                    'value' =>$item['search']['value']
+                ]);
+            }
+
+        endforeach;
+
+        // if search
+        if (empty($searchField))
+        {
+            $hasil = $modul->select($select)
+                           ->join("admin as admin_update", "mod_updated_by = admin_update.adm_id")
+                           ->join("admin as admin_create", "mod_created_by = admin_create.adm_id")
+                           ->orderBy($orderField, $orderType)
+                           ->orderBy('mod_nama', 'ASC')
+                           ->limit($length, $start)
+                           ->find();
+
+            return $this->response->setJSON([
+                'draw'            => $this->request->getGet('draw'),
+                'recordsTotal'    => $total,
+                'recordsFiltered' => $total,
+                'data'            => $modul->datatable($hasil, $start)
+            ]);
+        }
+
+        // get total filtered
+        foreach ($searchField as $item):
+
+            if (($item['field'] == 'mod_status') && ($item['value'] == 'aktif'))
+            {
+                $modul->where($item['field'], $item['value']);                
+
+            } else {
+
+                $modul->like($item['field'], $item['value']);
+            }
+
+        endforeach;
+
+        $filtered = $modul->where('mod_deleted_at', NULL)->countAllResults();
+
+        // get all data
+        foreach ($searchField as $item):
+
+            if (($item['field'] == 'mod_status') && ($item['value'] == 'aktif'))
+            {
+                $modul->where($item['field'], $item['value']);                
+
+            } else {
+
+                $modul->like($item['field'], $item['value']);
+            }
+
+        endforeach;
+
+        $hasil = $modul->select($select)
+                       ->join("admin as admin_update", "mod_updated_by = admin_update.adm_id")
+                       ->join("admin as admin_create", "mod_created_by = admin_create.adm_id")
+                       ->orderBy($orderField, $orderType)
+                       ->orderBy('mod_nama', 'ASC')
+                       ->limit($length, $start)
+                       ->find();
+
+        return $this->response->setJSON([
+            'draw'            => $this->request->getGet('draw'),
+            'recordsTotal'    => $total,
+            'recordsFiltered' => $filtered,
+            'data'            => $modul->datatable($hasil, $start)
+        ]);
     }
 
     //====================================================================================================
