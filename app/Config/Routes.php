@@ -67,12 +67,23 @@ $routes->group('sertifikasi', function($routes) {
     });
 
     $routes->group('modul', function($routes) {
-        $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\ModulController::select/$1', ['as' => 'Modul']);
+        $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\ModulController::select/$1');
         $routes->match(['get', 'options'], 'datatable', 'LIT\\ModulController::datatable');
         $routes->match(['post', 'options'], 'create', 'LIT\\ModulController::create');
         $routes->match(['post', 'options'], 'update', 'LIT\\ModulController::update');
-        $routes->match(['post', 'options'], 'status-update', 'LIT\\ModulController::updateStatus');
+        $routes->match(['post', 'options'], 'update-status', 'LIT\\ModulController::updateStatus');
         $routes->match(['post', 'options'], 'delete', 'LIT\\ModulController::delete');
+    });
+
+    $routes->group('menu', function($routes) {
+        $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\MenuController::select/$1');
+        $routes->match(['get', 'options'], 'get', 'LIT\\MenuController::get');
+        $routes->match(['post', 'options'], 'create', 'LIT\\MenuController::create');
+        $routes->match(['post', 'options'], 'create-parent', 'LIT\\MenuController::createParent');
+        $routes->match(['post', 'options'], 'update', 'LIT\\MenuController::update');
+        $routes->match(['post', 'options'], 'update-urutan', 'LIT\\MenuController::updateUrutan');
+        $routes->match(['post', 'options'], 'update-status', 'LIT\\MenuController::updateStatus');
+        $routes->match(['post', 'options'], 'delete', 'LIT\\MenuController::delete');
     });
 
     $routes->group('website', function($routes) {

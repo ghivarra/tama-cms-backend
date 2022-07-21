@@ -131,31 +131,4 @@ class AdminMenu extends Model
     }
 
     //========================================================================================================
-
-    public function datatable(array $data, int $offset = 0)
-    {
-        if (empty($data))
-        {
-            return $data;
-        }
-
-        foreach ($data as $n => $item):
-
-            if(isset($offset))
-            {
-                $data[$n]['no'] = $offset + $n + 1;
-            }
-
-            if (isset($item['adm_status']))
-            {
-                $data[$n]['adm_status'] = ucfirst($item['adm_status']);
-            }
-
-        endforeach;
-
-        // return
-        return $data;
-    }
-
-    //========================================================================================================
 }

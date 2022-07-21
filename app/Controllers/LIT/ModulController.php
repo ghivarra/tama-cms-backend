@@ -112,9 +112,14 @@ class ModulController extends BaseController
         // get total filtered
         foreach ($searchField as $item):
 
-            if (($item['field'] == 'mod_status') && ($item['value'] == 'aktif'))
+            if ($item['field'] == 'mod_status')
             {
                 $modul->where($item['field'], $item['value']);                
+
+            } elseif ($item['field'] == 'mod_created_at') {
+
+                $date = date('Y-m-d', strtotime($item['value']));
+                $modul->like($item['field'], $date, 'after');         
 
             } else {
 
@@ -128,9 +133,14 @@ class ModulController extends BaseController
         // get all data
         foreach ($searchField as $item):
 
-            if (($item['field'] == 'mod_status') && ($item['value'] == 'aktif'))
+            if ($item['field'] == 'mod_status')
             {
                 $modul->where($item['field'], $item['value']);                
+
+            } elseif ($item['field'] == 'mod_created_at') {
+
+                $date = date('Y-m-d', strtotime($item['value']));
+                $modul->like($item['field'], $date, 'after');         
 
             } else {
 
