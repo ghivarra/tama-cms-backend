@@ -301,6 +301,10 @@ class MenuController extends BaseController
             ]);
         }
 
+        // if empty then null
+        $data['men_link'] = empty(trim($data['men_link'])) ? NULL : $data['men_link'];
+        $data['men_icon'] = empty(trim($data['men_icon'])) ? NULL : $data['men_icon'];
+
         return $this->update($data);
     }
 
@@ -335,6 +339,10 @@ class MenuController extends BaseController
             ]);
         }
 
+        // if empty then null
+        $data['men_link'] = empty(trim($data['men_link'])) ? NULL : $data['men_link'];
+
+        // update
         return $this->update($data);
     }
 
