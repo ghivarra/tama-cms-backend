@@ -26,7 +26,7 @@ class MenuController extends BaseController
     {
         $menu = new AdminMenu();
 
-        $get = $menu->select('men_id, men_nama, men_jenis, men_parent, men_link, men_icon, men_urutan, men_status, adm_create.adm_nama as kreator, adm_update.adm_nama as editor')
+        $get = $menu->select('men_id, men_nama, men_jenis, men_parent, men_link, men_icon, men_urutan, men_status, men_created_at as date_create, men_updated_at as date_update, adm_create.adm_nama as creator, adm_update.adm_nama as updater')
                     ->join('admin as adm_create', 'men_created_by = adm_create.adm_id', 'left')
                     ->join('admin as adm_update', 'men_updated_by = adm_update.adm_id', 'left')
                     ->where('men_id', $id)
@@ -57,7 +57,7 @@ class MenuController extends BaseController
     public function get()
     {
         $menu    = new AdminMenu();
-        $allMenu = $menu->select('men_id, men_nama, men_jenis, men_parent, men_link, men_icon, men_urutan, men_status, men_created_at as date_create, men_updated_at as date_update, adm_create.adm_nama as kreator, adm_update.adm_nama as editor')
+        $allMenu = $menu->select('men_id, men_nama, men_jenis, men_parent, men_link, men_icon, men_urutan, men_status, men_created_at as date_create, men_updated_at as date_update, adm_create.adm_nama as creator, adm_update.adm_nama as updater')
                         ->join('admin as adm_create', 'men_created_by = adm_create.adm_id', 'left')
                         ->join('admin as adm_update', 'men_updated_by = adm_update.adm_id', 'left')
                         ->orderBy('men_urutan', 'ASC')
@@ -80,9 +80,12 @@ class MenuController extends BaseController
         // parse parent
         foreach ($allMenu as $n => $item):
 
+
             if ($item['men_jenis'] == 'parent')
             {
-                $item['men_child'] = [];
+                $item['date_create'] = strtotime($item['date_create']);
+                $item['date_update'] = strtotime($item['date_update']);
+                $item['men_child']   = [];
 
                 // push and delete parent
                 array_push($listMenu, $item);
@@ -97,6 +100,9 @@ class MenuController extends BaseController
 
             // parse child
             foreach ($allMenu as $n => $item):
+
+                $item['date_create'] = strtotime($item['date_create']);
+                $item['date_update'] = strtotime($item['date_update']);
 
                 // find and push
                 $key = array_search($item['men_parent'], $parent);
@@ -117,18 +123,12 @@ class MenuController extends BaseController
 
     //====================================================================================================
 
-    public function create()
+    private function create($data)
     {
-        $data = [
-            'men_nama'   => $this->request->getPost('men_nama'),
-            'men_status' => $this->request->getPost('men_status')
-        ];
-
         // validasi
         $validation = Services::validation();
         $validation->setRules([
-            'men_nama'   => ['label' => 'Nama Modul', 'rules' => 'required|max_length[120]|is_unique[admin_modul.men_nama]'],
-            'men_status' => ['label' => 'Status', 'rules' => 'required|in_list[aktif,nonaktif]'],
+            'men_jenis' => ['label' => 'Jenis Menu', 'rules' => 'required|in_list[parent,submenu]'],
         ]);
 
         // run
@@ -143,7 +143,7 @@ class MenuController extends BaseController
         }
 
         // create data
-        $menu = new AdminModul();
+        $menu = new AdminMenu();
         $menu->insert($data);
 
         // return
@@ -151,44 +151,115 @@ class MenuController extends BaseController
             'code'    => 200,
             'status'  => 'success',
             'title'   => 'Data Disimpan',
-            'message' => "Modul {$data['men_nama']} sudah dibuat"
+            'message' => "Menu {$data['men_nama']} sudah dibuat"
         ]);
     }
 
     //====================================================================================================
 
-    public function update()
+    public function createParent()
     {
         $data = [
-            'men_id'     => $this->request->getPost('men_id'),
             'men_nama'   => $this->request->getPost('men_nama'),
+            'men_link'   => $this->request->getPost('men_link'),
+            'men_icon'   => $this->request->getPost('men_icon'),
             'men_status' => $this->request->getPost('men_status')
         ];
 
         // validasi
         $validation = Services::validation();
         $validation->setRules([
-            'men_id'     => ['label' => 'Modul', 'rules' => 'required|numeric|is_not_unique[admin_modul.men_id]'],
-            'men_nama'   => ['label' => 'Nama Modul', 'rules' => 'required|max_length[120]'],
-            'men_status' => ['label' => 'Status', 'rules' => 'required|in_list[aktif,nonaktif]'],
+            'men_nama'   => ['label' => 'Nama Menu', 'rules' => 'required|max_length[120]'],
+            'men_status' => ['label' => 'Status Menu', 'rules' => 'required|in_list[aktif,nonaktif]']
         ]);
 
-        // run
         if (!$validation->run($data))
         {
             return $this->response->setStatusCode(400)->setJSON([
                 'code'    => 400,
                 'status'  => 'error',
-                'title'   => 'Gagal Menyimpan Data',
+                'title'   => 'Gagal Menambah Menu',
                 'message' => implode(', ', $validation->getErrors())
             ]);
         }
 
+        // tarik angka urutan tertinggi
+        $menu = new AdminMenu();
+        $get  = $menu->select('men_urutan')
+                     ->where('men_jenis', 'parent')
+                     ->orderBy('men_urutan', 'DESC')
+                     ->first();
+
+        // create
+        return $this->create([
+            'men_urutan' => empty($get) ? 1 : $get['men_urutan'] + 1,
+            'men_link'   => empty($data['men_link']) ? NULL : $data['men_link'],
+            'men_icon'   => empty($data['men_icon']) ? NULL : $data['men_icon'],
+            'men_nama'   => $data['men_nama'],
+            'men_status' => $data['men_status'],
+            'men_jenis'  => 'parent',
+            'men_parent' => NULL,
+        ]);
+    }
+
+    //====================================================================================================
+
+    public function createChild()
+    {
+        $data = [
+            'men_parent' => $this->request->getPost('men_parent'),
+            'men_nama'   => $this->request->getPost('men_nama'),
+            'men_link'   => $this->request->getPost('men_link'),
+            'men_status' => $this->request->getPost('men_status')
+        ];
+
+        // validasi
+        $validation = Services::validation();
+        $validation->setRules([
+            'men_nama'   => ['label' => 'Nama Menu', 'rules' => 'required|max_length[120]'],
+            'men_link'   => ['label' => 'Link/URL', 'rules' => 'required|max_length[120]'],
+            'men_status' => ['label' => 'Status Menu', 'rules' => 'required|in_list[aktif,nonaktif]']
+        ]);
+
+        if (!$validation->run($data))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Menambah Sub Menu',
+                'message' => implode(', ', $validation->getErrors())
+            ]);
+        }
+
+        // tarik angka urutan tertinggi
+        $menu = new AdminMenu();
+        $get  = $menu->select('men_urutan')
+                     ->where('men_jenis', 'submenu')
+                     ->where('men_parent', $data['men_parent'])
+                     ->orderBy('men_urutan', 'DESC')
+                     ->first();
+
+        // create
+        return $this->create([
+            'men_urutan' => empty($get) ? 1 : $get['men_urutan'] + 1,
+            'men_link'   => empty($data['men_link']) ? NULL : $data['men_link'],
+            'men_nama'   => $data['men_nama'],
+            'men_status' => $data['men_status'],
+            'men_parent' => $data['men_parent'],
+            'men_jenis'  => 'submenu',
+            'men_icon'   => NULL,
+        ]);
+    }
+
+    //====================================================================================================
+
+    private function update($data)
+    {
         // now unset unused data
         $id = $data['men_id'];
         unset($data['men_id']);
 
-        $menu = new AdminModul();
+        $menu = new AdminMenu();
         $menu->update($id, $data);
 
         // return
@@ -196,9 +267,44 @@ class MenuController extends BaseController
             'code'    => 200,
             'status'  => 'success',
             'title'   => 'Data Disimpan',
-            'message' => "Perubahan Modul {$data['men_nama']} sudah disimpan"
+            'message' => "Perubahan Menu {$data['men_nama']} sudah disimpan"
         ]);
     }
+
+    //====================================================================================================
+
+    public function updateParent()
+    {
+        $data = [
+            'men_id'     => $this->request->getPost('men_id'),
+            'men_nama'   => $this->request->getPost('men_nama'),
+            'men_link'   => $this->request->getPost('men_link'),
+            'men_icon'   => $this->request->getPost('men_icon'),
+            'men_status' => $this->request->getPost('men_status')
+        ];
+
+        // validasi
+        $validation = Services::validation();
+        $validation->setRules([
+            'men_id'     => ['label' => 'Menu', 'rules' => 'required|numeric|is_not_unique[admin_menu.men_id]'],
+            'men_nama'   => ['label' => 'Nama Menu', 'rules' => 'required|max_length[120]'],
+            'men_status' => ['label' => 'Status Menu', 'rules' => 'required|in_list[aktif,nonaktif]']
+        ]);
+
+        if (!$validation->run($data))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Menambah Menu',
+                'message' => implode(', ', $validation->getErrors())
+            ]);
+        }
+
+        return $this->update($data);
+    }
+
+    //====================================================================================================
 
     //====================================================================================================
 
@@ -265,11 +371,11 @@ class MenuController extends BaseController
                 'code'    => 400,
                 'status'  => 'error',
                 'title'   => 'Gagal Merubah Status',
-                'message' => 'Modul Tidak Ditemukan'
+                'message' => 'Menu Tidak Ditemukan'
             ]);
         }
 
-        $menu = new AdminModul();
+        $menu = new AdminMenu();
         $get   = $menu->select('men_status, men_nama')->where('men_id', $id)->first();
 
         if (empty($get))
@@ -278,7 +384,7 @@ class MenuController extends BaseController
                 'code'    => 400,
                 'status'  => 'error',
                 'title'   => 'Gagal Merubah Status',
-                'message' => 'Modul Tidak Ditemukan'
+                'message' => 'Menu Tidak Ditemukan'
             ]);
         }
 
@@ -294,7 +400,7 @@ class MenuController extends BaseController
             'code'    => 200,
             'status'  => 'success',
             'title'   => 'Status Disimpan',
-            'message' => "Modul {$get['men_nama']} sudah {$status}"
+            'message' => "Menu {$get['men_nama']} sudah {$status}"
         ]);
     }
 
@@ -310,11 +416,11 @@ class MenuController extends BaseController
                 'code'    => 400,
                 'status'  => 'error',
                 'title'   => 'Gagal Menghapus Data',
-                'message' => 'Modul Tidak Ditemukan'
+                'message' => 'Menu Tidak Ditemukan'
             ]);
         }
 
-        $menu = new AdminModul();
+        $menu = new AdminMenu();
         $get   = $menu->select('men_nama')->where('men_id', $id)->first();
 
         if (empty($get))
@@ -323,7 +429,7 @@ class MenuController extends BaseController
                 'code'    => 400,
                 'status'  => 'error',
                 'title'   => 'Gagal Menghapus Data',
-                'message' => 'Modul Tidak Ditemukan'
+                'message' => 'Menu Tidak Ditemukan'
             ]);
         }
 
@@ -335,7 +441,7 @@ class MenuController extends BaseController
             'code'    => 200,
             'status'  => 'success',
             'title'   => 'Data Dihapus',
-            'message' => "Modul {$get['men_nama']} sudah dihapus"
+            'message' => "Menu {$get['men_nama']} sudah dihapus"
         ]);
     }
 

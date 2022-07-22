@@ -78,9 +78,10 @@ $routes->group('sertifikasi', function($routes) {
     $routes->group('menu', function($routes) {
         $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\MenuController::select/$1');
         $routes->match(['get', 'options'], 'get', 'LIT\\MenuController::get');
-        $routes->match(['post', 'options'], 'create', 'LIT\\MenuController::create');
         $routes->match(['post', 'options'], 'create-parent', 'LIT\\MenuController::createParent');
-        $routes->match(['post', 'options'], 'update', 'LIT\\MenuController::update');
+        $routes->match(['post', 'options'], 'create-child', 'LIT\\MenuController::createChild');
+        $routes->match(['post', 'options'], 'update-parent', 'LIT\\MenuController::updateParent');
+        $routes->match(['post', 'options'], 'update-child', 'LIT\\MenuController::updateChild');
         $routes->match(['post', 'options'], 'update-urutan', 'LIT\\MenuController::updateUrutan');
         $routes->match(['post', 'options'], 'update-status', 'LIT\\MenuController::updateStatus');
         $routes->match(['post', 'options'], 'delete', 'LIT\\MenuController::delete');
