@@ -109,6 +109,11 @@ class SessionController extends BaseController
 
                 // find and push
                 $key = array_search($item['men_parent'], $parent);
+
+                if ($key === FALSE || $parent[$key] != $item['men_parent']) {
+                    continue;
+                }
+
                 array_push($listMenu[$key]['men_child'], $item);
 
             endforeach;
