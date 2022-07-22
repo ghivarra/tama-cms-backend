@@ -296,7 +296,7 @@ class MenuController extends BaseController
             return $this->response->setStatusCode(400)->setJSON([
                 'code'    => 400,
                 'status'  => 'error',
-                'title'   => 'Gagal Menambah Menu',
+                'title'   => 'Gagal Memperbaharui Menu',
                 'message' => implode(', ', $validation->getErrors())
             ]);
         }
@@ -305,6 +305,38 @@ class MenuController extends BaseController
     }
 
     //====================================================================================================
+
+    public function updateChild()
+    {
+        $data = [
+            'men_id'     => $this->request->getPost('men_id'),
+            'men_parent' => $this->request->getPost('men_parent'),
+            'men_nama'   => $this->request->getPost('men_nama'),
+            'men_link'   => $this->request->getPost('men_link'),
+            'men_status' => $this->request->getPost('men_status')
+        ];
+
+        // validasi
+        $validation = Services::validation();
+        $validation->setRules([
+            'men_id'     => ['label' => 'Menu', 'rules' => 'required|numeric|is_not_unique[admin_menu.men_id]'],
+            'men_parent' => ['label' => 'Parent', 'rules' => 'required|numeric|is_not_unique[admin_menu.men_id]'],
+            'men_nama'   => ['label' => 'Nama Submenu', 'rules' => 'required|max_length[120]'],
+            'men_status' => ['label' => 'Status Submenu', 'rules' => 'required|in_list[aktif,nonaktif]']
+        ]);
+
+        if (!$validation->run($data))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Memperbaharui Menu',
+                'message' => implode(', ', $validation->getErrors())
+            ]);
+        }
+
+        return $this->update($data);
+    }
 
     //====================================================================================================
 
