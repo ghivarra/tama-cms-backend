@@ -54,6 +54,22 @@ class ModulController extends BaseController
 
     //====================================================================================================
 
+    public function get()
+    {
+        $modul = new AdminModul();
+
+        // return
+        return $this->response->setStatusCode(200)->setJSON([
+            'code'    => 200,
+            'status'  => 'success',
+            'title'   => 'Pengambilan Data Berhasil',
+            'message' => "Data Modul berhasil diambil pada ".date('Y-m-d H:i:s'),
+            'data'    => $modul->select('mod_id, mod_nama, mod_status')->orderBy('mod_nama', 'ASC')->findAll()
+        ]);
+    }
+
+    //====================================================================================================
+
     public function datatable()
     {
         $modul = new AdminModul();
