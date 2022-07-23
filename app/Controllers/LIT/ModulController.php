@@ -54,7 +54,7 @@ class ModulController extends BaseController
 
     //====================================================================================================
 
-    public function get()
+    public function all()
     {
         $modul = new AdminModul();
 

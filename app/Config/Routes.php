@@ -69,7 +69,7 @@ $routes->group($_ENV['API_ADMIN_PAGE'], function($routes) {
     $routes->group('modul', function($routes) {
         $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\ModulController::select/$1');
         $routes->match(['get', 'options'], 'datatable', 'LIT\\ModulController::datatable');
-        $routes->match(['get', 'options'], 'get', 'LIT\\ModulController::get');
+        $routes->match(['get', 'options'], 'all', 'LIT\\ModulController::all');
         $routes->match(['post', 'options'], 'create', 'LIT\\ModulController::create');
         $routes->match(['post', 'options'], 'update', 'LIT\\ModulController::update');
         $routes->match(['post', 'options'], 'update-status', 'LIT\\ModulController::updateStatus');
@@ -78,6 +78,7 @@ $routes->group($_ENV['API_ADMIN_PAGE'], function($routes) {
 
     $routes->group('menu', function($routes) {
         $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\MenuController::select/$1');
+        $routes->match(['get', 'options'], 'all', 'LIT\\MenuController::all');
         $routes->match(['get', 'options'], 'get', 'LIT\\MenuController::get');
         $routes->match(['post', 'options'], 'create-parent', 'LIT\\MenuController::createParent');
         $routes->match(['post', 'options'], 'create-child', 'LIT\\MenuController::createChild');

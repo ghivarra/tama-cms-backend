@@ -54,6 +54,21 @@ class MenuController extends BaseController
 
     //====================================================================================================
 
+    public function all()
+    {
+        $menu = new AdminMenu();
+
+        return $this->response->setStatusCode(200)->setJSON([
+            'code'    => 200,
+            'status'  => 'success',
+            'title'   => 'Pengambilan Data Berhasil',
+            'message' => "Data menu berhasil diambil pada ".date('Y-m-d H:i:s'),
+            'data'    => $menu->select('men_id, men_nama, men_status')->orderBy('men_nama', 'ASC')->findAll()
+        ]);
+    }
+
+    //====================================================================================================
+
     public function get()
     {
         $menu    = new AdminMenu();
