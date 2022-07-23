@@ -39,7 +39,7 @@ $routes->get('/', 'Home::index');
 $routes->match(['get', 'options'], 'website', 'WebsiteController::get');
 
 // add autentikasi
-$routes->group('autentikasi', function($routes) {
+$routes->group($_ENV['API_LOGIN_PAGE'], function($routes) {
 
     $routes->match(['post', 'options'], '/', 'AutentikasiController::try');
     $routes->match(['get', 'options'], 'cek-akses', 'AutentikasiController::check');
@@ -55,7 +55,7 @@ $routes->group('autentikasi', function($routes) {
 });
 
 // admin
-$routes->group('sertifikasi', function($routes) {
+$routes->group($_ENV['API_ADMIN_PAGE'], function($routes) {
     $routes->match(['get', 'options'], 'logout', 'LIT\\SessionController::logout');
     $routes->match(['get', 'options'], 'admin-info', 'LIT\\SessionController::getAdminInfo');
     $routes->match(['get', 'options'], 'menu-list', 'LIT\\SessionController::getAllowedMenu');
