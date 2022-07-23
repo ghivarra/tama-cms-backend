@@ -87,6 +87,15 @@ $routes->group($_ENV['API_ADMIN_PAGE'], function($routes) {
         $routes->match(['post', 'options'], 'delete', 'LIT\\MenuController::delete');
     });
 
+    $routes->group('role', function($routes) {
+        $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\RoleController::select/$1');
+        $routes->match(['get', 'options'], 'datatable', 'LIT\\RoleController::datatable');
+        $routes->match(['post', 'options'], 'create', 'LIT\\RoleController::create');
+        $routes->match(['post', 'options'], 'update', 'LIT\\RoleController::update');
+        $routes->match(['post', 'options'], 'update-status', 'LIT\\RoleController::updateStatus');
+        $routes->match(['post', 'options'], 'delete', 'LIT\\RoleController::delete');
+    });
+
     $routes->group('website', function($routes) {
         $routes->match(['post', 'options'], 'update', 'LIT\\PengaturanController::update');
     });

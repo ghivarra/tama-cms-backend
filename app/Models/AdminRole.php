@@ -146,9 +146,14 @@ class AdminRole extends Model
                 $data[$n]['no'] = $offset + $n + 1;
             }
 
-            if (isset($item['adm_status']))
+            if (isset($item['date_update']))
             {
-                $data[$n]['adm_status'] = ucfirst($item['adm_status']);
+                $data[$n]['date_update'] = strtotime($item['date_update']);
+            }
+
+            if (isset($item['date_create']))
+            {
+                $data[$n]['date_create'] = strtotime($item['date_create']);
             }
 
         endforeach;
