@@ -269,31 +269,53 @@ class AdminController extends BaseController
     public function create()
     {
         $data = [
-            'adm_email'  => $this->request->getPost('adm_email'),
-            'adm_nama'   => $this->request->getPost('adm_nama'),
-            'adm_role'   => $this->request->getPost('adm_role'),
-            'adm_status' => $this->request->getPost('adm_status')
+            'adm_email'    => $this->request->getPost('adm_email'),
+            'adm_nama'     => $this->request->getPost('adm_nama'),
+            'adm_role'     => $this->request->getPost('adm_role'),
+            'adm_status'   => $this->request->getPost('adm_status'),
+            'adm_password' => $this->request->getPost('adm_password')
         ];
 
         // validasi
         $validation = Services::validation();
         $validation->setRules([
-            'adm_email'  => ['label' => 'Email', 'rules' => 'required|max_length[120]|is_unique[admin.adm_email]|valid_email'],
-            'adm_nama'   => ['label' => 'Nama Admin', 'rules' => 'required|max_length[120]'],
-            'adm_role'   => ['label' => 'Role', 'rules' => 'required|is_not_unique[admin_role.rol_id]'],
-            'adm_status' => ['label' => 'Status', 'rules' => 'required|in_list[aktif,nonaktif]'],
+            'adm_email'    => ['label' => 'Email', 'rules' => 'required|max_length[120]|is_unique[admin.adm_email]|valid_email'],
+            'adm_nama'     => ['label' => 'Nama Admin', 'rules' => 'required|max_length[120]'],
+            'adm_role'     => ['label' => 'Role', 'rules' => 'required|is_not_unique[admin_role.rol_id]'],
+            'adm_status'   => ['label' => 'Status', 'rules' => 'required|in_list[aktif,nonaktif]'],
+            'adm_password' => ['label' => 'Password', 'rules' => 'required|min_length[10]'],
         ]);
 
         // run
         if (!$validation->run($data))
         {
+            $errors = $validation->getErrors();
+
+            if (!preg_match("#[0-9]+#", $data['adm_password']))
+            {
+                $errors['adm_password'] = 'Password harus menggunakan huruf dan angka';
+            }
+
             return $this->response->setStatusCode(400)->setJSON([
                 'code'    => 400,
                 'status'  => 'error',
                 'title'   => 'Gagal Menyimpan Data',
-                'message' => implode(', ', $validation->getErrors())
+                'message' => implode(', ', $errors)
             ]);
+
+        } elseif(!preg_match("#[0-9]+#", $data['adm_password'])) {
+
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Menyimpan Data',
+                'message' => 'Password harus menggunakan huruf dan angka'
+            ]);
+
         }
+
+        // set data
+        $data['adm_password'] = password_hash($data['adm_password'], PASSWORD_DEFAULT);
 
         // create data
         $admin = new Admin();
