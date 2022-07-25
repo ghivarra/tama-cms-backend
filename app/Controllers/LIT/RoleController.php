@@ -28,7 +28,7 @@ class RoleController extends BaseController
     {
         $adminRoles = new AdminRole();
 
-        $get = $adminRoles->select('rol_id, rol_nama, rol_status, rol_list_modul, rol_list_menu, adm_create.adm_nama as creator, adm_update.adm_nama as updater')
+        $get = $adminRoles->select('rol_id, rol_nama, rol_status, rol_list_modul as rol_modul, rol_list_menu as rol_menu, adm_create.adm_nama as creator, adm_update.adm_nama as updater')
                           ->join('admin as adm_create', 'rol_created_by = adm_create.adm_id', 'left')
                           ->join('admin as adm_update', 'rol_updated_by = adm_update.adm_id', 'left')
                           ->where('rol_id', $id)
@@ -45,20 +45,20 @@ class RoleController extends BaseController
         }
 
         // parse data
-        if (!is_array(json_decode($get['rol_list_modul'], TRUE)))
+        if (!is_array(json_decode($get['rol_modul'], TRUE)))
         {
             $modul = new AdminModul();
             $modul = $modul->select('mod_id')->findAll();
 
-            $get['rol_list_modul'] = json_encode(array_column($modul, 'mod_id'));
+            $get['rol_modul'] = json_encode(array_column($modul, 'mod_id'));
         }
 
-        if (!is_array(json_decode($get['rol_list_menu'], TRUE)))
+        if (!is_array(json_decode($get['rol_menu'], TRUE)))
         {
             $menu = new AdminMenu();
             $menu = $menu->select('men_id')->findAll();
 
-            $get['rol_list_menu'] = json_encode(array_column($menu, 'men_id'));
+            $get['rol_menu'] = json_encode(array_column($menu, 'men_id'));
         }
 
         // return
