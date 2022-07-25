@@ -255,13 +255,25 @@ class RoleController extends BaseController
         $data = [
             'rol_id'     => $this->request->getPost('rol_id'),
             'rol_nama'   => $this->request->getPost('rol_nama'),
-            'rol_status' => $this->request->getPost('rol_status')
+            'rol_status' => $this->request->getPost('rol_status'),
+            'rol_modul'  => json_decode($this->request->getPost('rol_modul'), TRUE),
+            'rol_menu'   => json_decode($this->request->getPost('rol_menu'), TRUE),
         ];
+
+        if (!is_array($data['rol_modul']) OR !is_array($data['rol_menu']))
+        {
+            return $this->response->setStatusCode(400)->setJSON([
+                'code'    => 400,
+                'status'  => 'error',
+                'title'   => 'Gagal Menyimpan Data',
+                'message' => 'Ada kesalahan dalam format data modul atau menu'
+            ]);
+        }
 
         // validasi
         $validation = Services::validation();
         $validation->setRules([
-            'rol_id'     => ['label' => 'Modul', 'rules' => 'required|numeric|is_not_unique[admin_modul.rol_id]'],
+            'rol_id'     => ['label' => 'Menu', 'rules' => 'required|numeric|is_not_unique[admin_role.rol_id]'],
             'rol_nama'   => ['label' => 'Nama Role', 'rules' => 'required|max_length[120]'],
             'rol_status' => ['label' => 'Status', 'rules' => 'required|in_list[aktif,nonaktif]'],
         ]);
@@ -276,6 +288,18 @@ class RoleController extends BaseController
                 'message' => implode(', ', $validation->getErrors())
             ]);
         }
+
+        // parse data menu
+        $menu  = new AdminMenu();
+        $check = $menu->whereNotIn('men_id', $data['rol_menu'])->where('men_deleted_at', NULL)->countAllResults();
+        $data['rol_list_menu'] = empty($check) ? json_encode('Semua Menu') : json_encode($data['rol_menu']);
+        unset($data['rol_menu']);
+
+        // parse data modul
+        $modul  = new AdminModul();
+        $check = $modul->whereNotIn('mod_id', $data['rol_modul'])->where('mod_deleted_at', NULL)->countAllResults();
+        $data['rol_list_modul'] = empty($check) ? json_encode('Semua Modul') : json_encode($data['rol_modul']);
+        unset($data['rol_modul']);
 
         // now unset unused data
         $id = $data['rol_id'];
