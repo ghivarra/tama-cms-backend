@@ -269,14 +269,18 @@ class AdminController extends BaseController
     public function create()
     {
         $data = [
+            'adm_email'  => $this->request->getPost('adm_email'),
             'adm_nama'   => $this->request->getPost('adm_nama'),
+            'adm_role'   => $this->request->getPost('adm_role'),
             'adm_status' => $this->request->getPost('adm_status')
         ];
 
         // validasi
         $validation = Services::validation();
         $validation->setRules([
-            'adm_nama'   => ['label' => 'Nama Admin', 'rules' => 'required|max_length[120]|is_unique[admin_modul.adm_nama]'],
+            'adm_email'  => ['label' => 'Email', 'rules' => 'required|max_length[120]|is_unique[admin.adm_email]|valid_email'],
+            'adm_nama'   => ['label' => 'Nama Admin', 'rules' => 'required|max_length[120]'],
+            'adm_role'   => ['label' => 'Role', 'rules' => 'required|is_not_unique[admin_role.rol_id]'],
             'adm_status' => ['label' => 'Status', 'rules' => 'required|in_list[aktif,nonaktif]'],
         ]);
 
