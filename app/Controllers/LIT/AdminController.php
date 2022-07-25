@@ -80,7 +80,7 @@ class AdminController extends BaseController
         $length = $this->request->getGet('length');
         $search = $this->request->getGet('search');
         $column = $this->request->getGet('columns');
-        $select = "adm_id, adm_nama, adm_email, adm_foto, adm_status, adm_created_at as date_create, adm_updated_at as date_update, admin_update.adm_nama as updater, admin_create.adm_nama as creator";
+        $select = "adm_id, adm_nama, adm_email, adm_foto, adm_status, adm_created_at as date_create, adm_updated_at as date_update";
 
 
         // order field
@@ -110,8 +110,6 @@ class AdminController extends BaseController
         if (empty($searchField))
         {
             $hasil = $admin->select($select)
-                           ->join("admin as admin_update", "adm_updated_by = admin_update.adm_id")
-                           ->join("admin as admin_create", "adm_created_by = admin_create.adm_id")
                            ->orderBy($orderField, $orderType)
                            ->orderBy('adm_nama', 'ASC')
                            ->limit($length, $start)
@@ -128,46 +126,113 @@ class AdminController extends BaseController
         // get total filtered
         foreach ($searchField as $item):
 
-            if ($item['field'] == 'adm_status')
-            {
-                $admin->where($item['field'], $item['value']);                
+            switch ($item['field']) {
+                case 'adm_status':
+                    $admin->where($item['field'], $item['value']);
+                    break;
 
-            } elseif ($item['field'] == 'adm_created_at') {
+                case 'adm_created_at':
+                    $date = date('Y-m-d', strtotime($item['value']));
+                    $admin->like($item['field'], $date, 'after');  
+                    break;
 
-                $date = date('Y-m-d', strtotime($item['value']));
-                $admin->like($item['field'], $date, 'after');         
-
-            } else {
-
-                $admin->like($item['field'], $item['value']);
+                case 'adm_nama':
+                    $admin->like($item['field'], $item['value']);
+                    $again = true;
+                    $againVal = $item['value'];
+                    break;
+                
+                default:
+                    $admin->like($item['field'], $item['value']);
+                    break;
             }
 
         endforeach;
+
+        if (isset($again) && isset($againVal))
+        {
+            $admin->orLike('adm_email', $againVal);
+
+            foreach ($searchField as $item):
+
+                switch ($item['field']) {
+                    case 'adm_status':
+                        $admin->where($item['field'], $item['value']);
+                        break;
+
+                    case 'adm_created_at':
+                        $date = date('Y-m-d', strtotime($item['value']));
+                        $admin->like($item['field'], $date, 'after');  
+                        break;
+
+                    case 'adm_nama':
+                        // do nothing
+                        break;
+                    
+                    default:
+                        $admin->like($item['field'], $item['value']);
+                        break;
+                }
+
+            endforeach;
+        }
 
         $filtered = $admin->where('adm_deleted_at', NULL)->countAllResults();
 
-        // get all data
         foreach ($searchField as $item):
 
-            if ($item['field'] == 'adm_status')
-            {
-                $admin->where($item['field'], $item['value']);                
+            switch ($item['field']) {
+                case 'adm_status':
+                    $admin->where($item['field'], $item['value']);
+                    break;
 
-            } elseif ($item['field'] == 'adm_created_at') {
+                case 'adm_created_at':
+                    $date = date('Y-m-d', strtotime($item['value']));
+                    $admin->like($item['field'], $date, 'after');  
+                    break;
 
-                $date = date('Y-m-d', strtotime($item['value']));
-                $admin->like($item['field'], $date, 'after');         
-
-            } else {
-
-                $admin->like($item['field'], $item['value']);
+                case 'adm_nama':
+                    $admin->like($item['field'], $item['value']);
+                    $again = true;
+                    $againVal = $item['value'];
+                    break;
+                
+                default:
+                    $admin->like($item['field'], $item['value']);
+                    break;
             }
 
         endforeach;
 
+        if (isset($again) && isset($againVal))
+        {
+            $admin->orLike('adm_email', $againVal);
+
+            foreach ($searchField as $item):
+
+                switch ($item['field']) {
+                    case 'adm_status':
+                        $admin->where($item['field'], $item['value']);
+                        break;
+
+                    case 'adm_created_at':
+                        $date = date('Y-m-d', strtotime($item['value']));
+                        $admin->like($item['field'], $date, 'after');  
+                        break;
+
+                    case 'adm_nama':
+                        // do nothing
+                        break;
+                    
+                    default:
+                        $admin->like($item['field'], $item['value']);
+                        break;
+                }
+
+            endforeach;
+        }
+
         $hasil = $admin->select($select)
-                       ->join("admin as admin_update", "adm_updated_by = admin_update.adm_id")
-                       ->join("admin as admin_create", "adm_created_by = admin_create.adm_id")
                        ->orderBy($orderField, $orderType)
                        ->orderBy('adm_nama', 'ASC')
                        ->limit($length, $start)
