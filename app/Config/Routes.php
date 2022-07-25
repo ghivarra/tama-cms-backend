@@ -92,6 +92,7 @@ $routes->group($_ENV['API_ADMIN_PAGE'], function($routes) {
     $routes->group('role', function($routes) {
         $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\RoleController::select/$1');
         $routes->match(['get', 'options'], 'datatable', 'LIT\\RoleController::datatable');
+        $routes->match(['get', 'options'], 'all', 'LIT\\RoleController::all');
         $routes->match(['post', 'options'], 'create', 'LIT\\RoleController::create');
         $routes->match(['post', 'options'], 'update', 'LIT\\RoleController::update');
         $routes->match(['post', 'options'], 'update-status', 'LIT\\RoleController::updateStatus');

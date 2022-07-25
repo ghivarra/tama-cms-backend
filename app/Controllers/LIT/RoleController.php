@@ -73,6 +73,21 @@ class RoleController extends BaseController
 
     //====================================================================================================
 
+    public function all()
+    {
+        $roles = new AdminRole();
+
+        return $this->response->setStatusCode(200)->setJSON([
+            'code'    => 200,
+            'status'  => 'success',
+            'title'   => 'Pengambilan Data Berhasil',
+            'message' => "Data Role berhasil diambil pada ".date('Y-m-d H:i:s'),
+            'data'    => $roles->select('rol_id, rol_nama')->where('rol_status', 'aktif')->orderBy('rol_nama', 'ASC')->findAll()
+        ]);
+    }
+
+    //====================================================================================================
+
     public function datatable()
     {
         $roles = new AdminRole();

@@ -80,7 +80,7 @@ class AdminController extends BaseController
         $length = $this->request->getGet('length');
         $search = $this->request->getGet('search');
         $column = $this->request->getGet('columns');
-        $select = "adm_id, adm_nama, adm_email, adm_foto, adm_status, adm_created_at as date_create, adm_updated_at as date_update";
+        $select = "adm_id, adm_nama, adm_email, adm_foto, adm_status, adm_role, rol_nama, adm_created_at as date_create, adm_updated_at as date_update";
 
 
         // order field
@@ -110,6 +110,7 @@ class AdminController extends BaseController
         if (empty($searchField))
         {
             $hasil = $admin->select($select)
+                           ->join('admin_role', 'adm_role = rol_id')
                            ->orderBy($orderField, $orderType)
                            ->orderBy('adm_nama', 'ASC')
                            ->limit($length, $start)
@@ -129,6 +130,10 @@ class AdminController extends BaseController
             switch ($item['field']) {
                 case 'adm_status':
                     $admin->where($item['field'], $item['value']);
+                    break;
+
+                case 'adm_role':
+                    $admin->where('adm_role', $item['value']);
                     break;
 
                 case 'adm_created_at':
@@ -158,6 +163,10 @@ class AdminController extends BaseController
                 switch ($item['field']) {
                     case 'adm_status':
                         $admin->where($item['field'], $item['value']);
+                        break;
+
+                    case 'adm_role':
+                        $admin->where('adm_role', $item['value']);
                         break;
 
                     case 'adm_created_at':
@@ -186,6 +195,10 @@ class AdminController extends BaseController
                     $admin->where($item['field'], $item['value']);
                     break;
 
+                case 'adm_role':
+                    $admin->where('adm_role', $item['value']);
+                    break;
+
                 case 'adm_created_at':
                     $date = date('Y-m-d', strtotime($item['value']));
                     $admin->like($item['field'], $date, 'after');  
@@ -215,6 +228,10 @@ class AdminController extends BaseController
                         $admin->where($item['field'], $item['value']);
                         break;
 
+                    case 'adm_role':
+                        $admin->where('adm_role', $item['value']);
+                        break;
+
                     case 'adm_created_at':
                         $date = date('Y-m-d', strtotime($item['value']));
                         $admin->like($item['field'], $date, 'after');  
@@ -233,6 +250,7 @@ class AdminController extends BaseController
         }
 
         $hasil = $admin->select($select)
+                       ->join('admin_role', 'adm_role = rol_id')
                        ->orderBy($orderField, $orderType)
                        ->orderBy('adm_nama', 'ASC')
                        ->limit($length, $start)
