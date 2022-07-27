@@ -56,60 +56,60 @@ $routes->group($_ENV['API_LOGIN_PAGE'], function($routes) {
 
 // admin
 $routes->group($_ENV['API_ADMIN_PAGE'], function($routes) {
-    $routes->match(['get', 'options'], 'logout', 'LIT\\SessionController::logout');
-    $routes->match(['get', 'options'], 'admin-info', 'LIT\\SessionController::getAdminInfo');
-    $routes->match(['get', 'options'], 'menu-list', 'LIT\\SessionController::getAllowedMenu');
+    $routes->match(['get', 'options'], 'logout', 'Admin\\SessionController::logout');
+    $routes->match(['get', 'options'], 'admin-info', 'Admin\\SessionController::getAdminInfo');
+    $routes->match(['get', 'options'], 'menu-list', 'Admin\\SessionController::getAllowedMenu');
 
     $routes->group('akun', function($routes) {
-        $routes->match(['post', 'options'], 'update', 'LIT\\AkunController::update');
-        $routes->match(['post', 'options'], 'rubah-password', 'LIT\\AkunController::changePassword');
-        $routes->match(['post', 'options'], 'konfirmasi-otp', 'LIT\\AkunController::confirmation');
+        $routes->match(['post', 'options'], 'update', 'Admin\\AkunController::update');
+        $routes->match(['post', 'options'], 'rubah-password', 'Admin\\AkunController::changePassword');
+        $routes->match(['post', 'options'], 'konfirmasi-otp', 'Admin\\AkunController::confirmation');
     });
 
     $routes->group('modul', function($routes) {
-        $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\ModulController::select/$1');
-        $routes->match(['get', 'options'], 'datatable', 'LIT\\ModulController::datatable');
-        $routes->match(['get', 'options'], 'all', 'LIT\\ModulController::all');
-        $routes->match(['post', 'options'], 'create', 'LIT\\ModulController::create');
-        $routes->match(['post', 'options'], 'update', 'LIT\\ModulController::update');
-        $routes->match(['post', 'options'], 'update-status', 'LIT\\ModulController::updateStatus');
-        $routes->match(['post', 'options'], 'delete', 'LIT\\ModulController::delete');
+        $routes->match(['get', 'options'], 'select/(:num)', 'Admin\\ModulController::select/$1');
+        $routes->match(['get', 'options'], 'datatable', 'Admin\\ModulController::datatable');
+        $routes->match(['get', 'options'], 'all', 'Admin\\ModulController::all');
+        $routes->match(['post', 'options'], 'create', 'Admin\\ModulController::create');
+        $routes->match(['post', 'options'], 'update', 'Admin\\ModulController::update');
+        $routes->match(['post', 'options'], 'update-status', 'Admin\\ModulController::updateStatus');
+        $routes->match(['post', 'options'], 'delete', 'Admin\\ModulController::delete');
     });
 
     $routes->group('menu', function($routes) {
-        $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\MenuController::select/$1');
-        $routes->match(['get', 'options'], 'all', 'LIT\\MenuController::all');
-        $routes->match(['get', 'options'], 'get', 'LIT\\MenuController::get');
-        $routes->match(['post', 'options'], 'create-parent', 'LIT\\MenuController::createParent');
-        $routes->match(['post', 'options'], 'create-child', 'LIT\\MenuController::createChild');
-        $routes->match(['post', 'options'], 'update-parent', 'LIT\\MenuController::updateParent');
-        $routes->match(['post', 'options'], 'update-child', 'LIT\\MenuController::updateChild');
-        $routes->match(['post', 'options'], 'update-urutan', 'LIT\\MenuController::updateUrutan');
-        $routes->match(['post', 'options'], 'update-status', 'LIT\\MenuController::updateStatus');
-        $routes->match(['post', 'options'], 'delete', 'LIT\\MenuController::delete');
+        $routes->match(['get', 'options'], 'select/(:num)', 'Admin\\MenuController::select/$1');
+        $routes->match(['get', 'options'], 'all', 'Admin\\MenuController::all');
+        $routes->match(['get', 'options'], 'get', 'Admin\\MenuController::get');
+        $routes->match(['post', 'options'], 'create-parent', 'Admin\\MenuController::createParent');
+        $routes->match(['post', 'options'], 'create-child', 'Admin\\MenuController::createChild');
+        $routes->match(['post', 'options'], 'update-parent', 'Admin\\MenuController::updateParent');
+        $routes->match(['post', 'options'], 'update-child', 'Admin\\MenuController::updateChild');
+        $routes->match(['post', 'options'], 'update-urutan', 'Admin\\MenuController::updateUrutan');
+        $routes->match(['post', 'options'], 'update-status', 'Admin\\MenuController::updateStatus');
+        $routes->match(['post', 'options'], 'delete', 'Admin\\MenuController::delete');
     });
 
     $routes->group('role', function($routes) {
-        $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\RoleController::select/$1');
-        $routes->match(['get', 'options'], 'datatable', 'LIT\\RoleController::datatable');
-        $routes->match(['get', 'options'], 'all', 'LIT\\RoleController::all');
-        $routes->match(['post', 'options'], 'create', 'LIT\\RoleController::create');
-        $routes->match(['post', 'options'], 'update', 'LIT\\RoleController::update');
-        $routes->match(['post', 'options'], 'update-status', 'LIT\\RoleController::updateStatus');
-        $routes->match(['post', 'options'], 'delete', 'LIT\\RoleController::delete');
+        $routes->match(['get', 'options'], 'select/(:num)', 'Admin\\RoleController::select/$1');
+        $routes->match(['get', 'options'], 'datatable', 'Admin\\RoleController::datatable');
+        $routes->match(['get', 'options'], 'all', 'Admin\\RoleController::all');
+        $routes->match(['post', 'options'], 'create', 'Admin\\RoleController::create');
+        $routes->match(['post', 'options'], 'update', 'Admin\\RoleController::update');
+        $routes->match(['post', 'options'], 'update-status', 'Admin\\RoleController::updateStatus');
+        $routes->match(['post', 'options'], 'delete', 'Admin\\RoleController::delete');
     });
 
     $routes->group('admin', function($routes) {
-        $routes->match(['get', 'options'], 'select/(:num)', 'LIT\\AdminController::select/$1');
-        $routes->match(['get', 'options'], 'datatable', 'LIT\\AdminController::datatable');
-        $routes->match(['post', 'options'], 'create', 'LIT\\AdminController::create');
-        $routes->match(['post', 'options'], 'update', 'LIT\\AdminController::update');
-        $routes->match(['post', 'options'], 'update-status', 'LIT\\AdminController::updateStatus');
-        $routes->match(['post', 'options'], 'delete', 'LIT\\AdminController::delete');
+        $routes->match(['get', 'options'], 'select/(:num)', 'Admin\\AdminController::select/$1');
+        $routes->match(['get', 'options'], 'datatable', 'Admin\\AdminController::datatable');
+        $routes->match(['post', 'options'], 'create', 'Admin\\AdminController::create');
+        $routes->match(['post', 'options'], 'update', 'Admin\\AdminController::update');
+        $routes->match(['post', 'options'], 'update-status', 'Admin\\AdminController::updateStatus');
+        $routes->match(['post', 'options'], 'delete', 'Admin\\AdminController::delete');
     });
 
     $routes->group('website', function($routes) {
-        $routes->match(['post', 'options'], 'update', 'LIT\\PengaturanController::update');
+        $routes->match(['post', 'options'], 'update', 'Admin\\PengaturanController::update');
     });
 });
 

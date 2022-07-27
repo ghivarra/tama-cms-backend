@@ -7,11 +7,11 @@
  *
  * Created with love and proud by Ghivarra Senandika Rushdie
  *
- * @package API GSS LIT
+ * @package API TAMA CMS
  *
  * @var https://facebook.com/bcvgr
  * @var https://twitter.com/ghivarra
- * @var https://instagram.com/ghivarra
+ * @var https://github.com/ghivarra
  *
 **/
 
