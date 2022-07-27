@@ -14,6 +14,9 @@ use App\Filters\Api;
 use App\Filters\AksesFilter;
 use App\Filters\Throttle;
 
+define('LOGINPAGE', $_ENV['API_LOGIN_PAGE']);
+define('ADMINPAGE', $_ENV['API_ADMIN_PAGE']);
+
 class Filters extends BaseConfig
 {
     /**
@@ -80,16 +83,16 @@ class Filters extends BaseConfig
      */
     public $filters = [
         'loggedIn' => [
-            'before' => ['autentikasi', 'autentikasi/*']
+            'before' => [LOGINPAGE, LOGINPAGE . '/*']
         ],
         'loggedOut' => [
-            'before' => ['sertifikasi', 'sertifikasi/*']
+            'before' => [ADMINPAGE, ADMINPAGE . '/*']
         ],
         'akses' => [
-            'before' => ['sertifikasi/modul/*', 'sertifikasi/website/*', 'sertifikasi/menu/*', 'sertifikasi/role/*', 'sertifikasi/admin/*']
+            'before' => [ADMINPAGE . '/modul/*', ADMINPAGE . '/website/*', ADMINPAGE . '/menu/*', ADMINPAGE . '/role/*', ADMINPAGE . '/admin/*']
         ],
         'throttle' => [
-            'before' => ['autentikasi', 'autentikasi/*']
+            'before' => [LOGINPAGE, LOGINPAGE . '/*']
         ]
     ];
 }
