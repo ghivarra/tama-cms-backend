@@ -47,6 +47,7 @@ class Filters extends BaseConfig
     public $globals = [
         'before' => [
             'api',
+            'akses',
             // 'csrf',
             // 'invalidchars',
         ],
@@ -87,9 +88,6 @@ class Filters extends BaseConfig
         ],
         'loggedOut' => [
             'before' => [ADMINPAGE, ADMINPAGE . '/*']
-        ],
-        'akses' => [
-            'before' => [ADMINPAGE . '/modul/*', ADMINPAGE . '/website/*', ADMINPAGE . '/menu/*', ADMINPAGE . '/role/*', ADMINPAGE . '/admin/*']
         ],
         'throttle' => [
             'before' => [LOGINPAGE, LOGINPAGE . '/*']

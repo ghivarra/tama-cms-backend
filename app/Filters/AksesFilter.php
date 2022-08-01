@@ -10,6 +10,40 @@ use Config\Services;
 
 class AksesFilter implements FilterInterface
 {
+    private function getModul($key)
+    {
+        $uri   = new Uri(current_url());
+        $modul = new AdminModul();
+
+        // set
+        $link = $uri->getSegments();
+        $slug = [];
+        $inst = '';
+
+        foreach ($link as $n => $val):
+
+            if ($n == $key)
+            {
+                $inst = $val;
+                array_push($slug, $inst);
+
+            } elseif ($n > $key) {
+
+                $inst .= "/{$val}";
+                array_push($slug, $inst);
+            }
+
+        endforeach;
+
+        if (empty($slug))
+        {
+            return [];
+        }
+
+        // return
+        return $modul->select('mod_id')->whereIn('mod_nama', $slug)->first();
+    }
+
     /**
      * Do whatever processing this filter needs to do.
      * By default it should not return anything during
@@ -28,29 +62,18 @@ class AksesFilter implements FilterInterface
     public function before(RequestInterface $request, $arguments = null)
     {
         // get modul name
-        $uri      = new Uri(current_url());
         $response = Services::response();
         $session  = Services::session();
 
-        // controller
-        $controller = $uri->getSegment(2);
-        $method     = $uri->getSegment(3);
-
-        // get filtered modul
-        $adminModul = new AdminModul();
-        $get        = $adminModul->select('mod_id')->where('mod_nama', $controller)->first();
+        // get modul
+        $modul = $this->getModul(1);
 
         // empty
-        if (empty($get))
-        {
-            $get = $adminModul->select('mod_id')->where('mod_nama', "{$controller}/${method}")->first();
-        }
-
-        if (isset($get['mod_id']))
+        if (isset($modul['mod_id']))
         {
             $akses = new Akses();
 
-            if (!$akses->cekAksesModul($get['mod_id']))
+            if (!$akses->cekAksesModul($modul['mod_id']))
             {
                 return $response->setStatusCode(403)->setJSON([
                     'code'    => 403,
